@@ -25,6 +25,27 @@ public class StudyDashboard {
         studyDashboard.print();
     }
 
+    private Participant findParticipant(String username, List<Participant> participants) {
+        return isNewParticipant(username, participants) ?
+                createNewParticipant(username, participants) :
+                findExistingParticipant(username, participants);
+    }
+
+    private Participant findExistingParticipant(String username, List<Participant> participants) {
+        return participants.stream().filter(p -> p.username().equals(username)).findFirst().orElseThrow();
+    }
+
+    private Participant createNewParticipant(String username, List<Participant> participants) {
+        Participant participant;
+        participant = new Participant(username);
+        participants.add(participant);
+        return participant;
+    }
+
+    private boolean isNewParticipant(String username, List<Participant> participants) {
+        return participants.stream().noneMatch(p -> p.username().equals(username));
+    }
+
     private void print() throws IOException, InterruptedException {
         GitHub gitHub = GitHub.connect();
         GHRepository repository = gitHub.getRepository("whiteship/live-study");
@@ -60,17 +81,4 @@ public class StudyDashboard {
 
         new StudyPrinter(this.totalNumberOfEvents, participants).execute();
     }
-
-    private Participant findParticipant(String username, List<Participant> participants) {
-        Participant participant;
-        if (participants.stream().noneMatch(p -> p.username().equals(username))) {
-            participant = new Participant(username);
-            participants.add(participant);
-        } else {
-            participant = participants.stream().filter(p -> p.username().equals(username)).findFirst().orElseThrow();
-        }
-
-        return participant;
-    }
-
 }
